@@ -12,7 +12,7 @@ All you need (for now):
 # Description
 
 After going through the first five RL lectures by David Silver and "Reinforcement Learning: 
-An Introduction (Sutton and Barto)", I implemented SARSA and Q-learning algorithms with adjustable lambda.
+An Introduction (Sutton and Barto)", I implemented SARSA and Q-learning algorithms with eligibility traces (adjustable lambda).
 
 Since the cartpole problem is composed of continuous state-space features, for now, I discretize it using the 
 create_bins method. As I go through the next chapters of the book and more David Silver lectures,
