@@ -96,6 +96,10 @@ class RL_Agent:
                 next_state, self.reward, done, info = self.env.step(self.action)
                 self.next_state = self.discretize_state(next_state)
 
+                # Experimenting with very bad reward if agent fails
+                if done and t < 199:
+                    self.reward = -100
+
                 # We need to check if SARSA or Q-learning to decide how to choose next action
                 self.next_action_value()
 
@@ -149,6 +153,6 @@ class RL_Agent:
 
 if __name__ == "__main__":
     np.random.seed(0)
-    agent = RL_Agent(num_actions=2, et_lambda=0.0)  # 2 for cartpole, left and right
+    agent = RL_Agent(num_actions=2, et_lambda=0.3, algorithm='Qlearn')  # 2 for cartpole, left and right
     agent.train_agent()
     agent.final_agent_test()
