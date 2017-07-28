@@ -3,20 +3,21 @@ import numpy as np
 
 
 class RL_Agent:
-    def __init__(self, num_actions, func_approx=False, algorithm='Qlearn', et_lambda=0.5):
+    def __init__(self, num_actions, algorithm='Qlearn', et_lambda=0.5):
         self.env = gym.make("CartPole-v0")
         self.env.seed(0)
         self.num_episodes = 5000
-        self.num_timesteps = 200
+        self.num_timesteps = 199
         self.num_actions = num_actions
         self.gamma = 1.0  # discount rate
         self.epsilon = 1.0  # exploration rate
         self.minimum_exploration = 0.01
         self.exploration_decay = 0.99
-        self.alpha = 0.5
+        self.alpha = 0.46
+        self.alpha_decay = 1.0
+        self.minimum_alpha = 0.1
         self.et_lambda = et_lambda  # Lambda for eligibility trace
-        if not func_approx:
-            self.create_bins()
+        self.create_bins()
         self.create_q_vals()
         self.algorithm = algorithm
 
@@ -69,12 +70,18 @@ class RL_Agent:
         else:
             self.epsilon = self.minimum_exploration
 
+    def decay_alpha(self):
+        if self.alpha > self.minimum_alpha:
+            self.alpha *= self.alpha_decay
+        else:
+            self.alpha = self.minimum_alpha
+
     def train_agent(self):
 
         # Average Number of steps per episodes
         ave_steps_per_episode = np.zeros((100, 1))
         idx_steps = -1
-        for i_episode in range(self.num_episodes):
+        for i_episode in xrange(self.num_episodes):
 
             # Adding Eligibility traces
             self.zero_eligibility_traces()
@@ -86,7 +93,7 @@ class RL_Agent:
             if self.algorithm == 'SARSA':
                 self.action = self.eps_action_selection(self.state)
 
-            for t in range(200):  # Maximum is 200 for game dynamics
+            for t in xrange(self.num_timesteps):  # Maximum is 200 for game dynamics
 
                 # Choose Action based on epsilon greedy for Q-learning INSIDE LOOP
                 if self.algorithm == 'Qlearn':
@@ -97,7 +104,7 @@ class RL_Agent:
                 self.next_state = self.discretize_state(next_state)
 
                 # Experimenting with very bad reward if agent fails
-                if done and t < 199:
+                if done:
                     self.reward = -100
 
                 # We need to check if SARSA or Q-learning to decide how to choose next action
@@ -112,19 +119,20 @@ class RL_Agent:
                 if self.algorithm == 'SARSA':
                     self.action = self.next_action
 
-                if done:
+                if done or t == 198:
                     if (i_episode + 1) % 10 == 0:
                         print("Episode {} finished after {} timesteps".format(i_episode + 1, t + 1))
                     break
 
             # Update exploration variable
             self.decay_epsilon()
+            self.decay_alpha()
 
             # Keeping the running average to determine if the agent is doing good
             idx_steps += 1
             if idx_steps > 99:
                 idx_steps = 0
-            ave_steps_per_episode[idx_steps] = t
+            ave_steps_per_episode[idx_steps] = t + 1
             if np.mean(ave_steps_per_episode) >= 195:  # As per the rules from Gym
                 break
 
@@ -153,6 +161,11 @@ class RL_Agent:
 
 if __name__ == "__main__":
     np.random.seed(0)
-    agent = RL_Agent(num_actions=2, et_lambda=0.3, algorithm='Qlearn')  # 2 for cartpole, left and right
+    # Best performances for with and without lambda.
+    # SARSA, lambda = 0.0, alpha = 0.45 constant  => 420 episodes, 10/10 @ 500
+    # Qlearn, lambda = 0.0, alpha = 0.46 constant  => 450 episodes, 10/10 @ 500
+    # SARSA, lambda = 0.37, alpha = 0.46 constant => 360 episodes, 10/10 @ 500
+    # Qlearn, lambda = 0.5, alpha = 0.5-0.1-0.9 => 280 episodes, 10/10 @ 500
+    agent = RL_Agent(num_actions=2, et_lambda=0.37, algorithm='SARSA')  # 2 for cartpole, left and right
     agent.train_agent()
     agent.final_agent_test()
