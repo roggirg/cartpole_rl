@@ -161,11 +161,6 @@ class RL_Agent:
 
 if __name__ == "__main__":
     np.random.seed(0)
-    # Best performances for with and without lambda.
-    # SARSA, lambda = 0.0, alpha = 0.45 constant  => 420 episodes, 10/10 @ 500
-    # Qlearn, lambda = 0.0, alpha = 0.46 constant  => 450 episodes, 10/10 @ 500
-    # SARSA, lambda = 0.37, alpha = 0.46 constant => 360 episodes, 10/10 @ 500
-    # Qlearn, lambda = 0.5, alpha = 0.5-0.1-0.9 => 280 episodes, 10/10 @ 500
     agent = RL_Agent(num_actions=2, et_lambda=0.37, algorithm='SARSA')  # 2 for cartpole, left and right
     agent.train_agent()
     agent.final_agent_test()
