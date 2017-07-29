@@ -25,15 +25,17 @@ An Introduction (Sutton and Barto)", I implemented the following three methods:
 
 - DQN Method: Here, I create a small 2-layer neural network, using keras, with an Adam optimizer and mean-squared error loss function. I maintain a 100 timesteps of the latest experience and train the agent every 2 timesteps on 20 randomly sampled timesteps. Of course, these values can (and should) be played with. Otherwise, this follows the Q-learning algorithm for action-selection.
 
-# Playing with Hyperparameters (Empirical)
-As per the rules by OpenAI, "Considered solved when the average reward is greater than or equal to 
-195.0 over 100 consecutive trials." 
+# Playing with Hyperparameters (Empirically)
+In all implemented methods, I follow the rules set by OpenAI, i.e. "Considered solved when the average reward is greater than or equal to 195.0 over 100 consecutive trials.". Therefore, when an agent achieves a mean score of 195.0 over 100 consecutive trials, I break from the training loop and test the agent using the final_agent_test() function. However, in the testing phase, I require that the agent survives 500 timesteps without failing 10 episodes.
 
-- Lambda for Eligibility Traces: The agent succeeds when et_lambda=[0.0, 0.6], whether SARSA or Q-learning.
+After playing with all the hyperparameters, the following table shows the best hyperparameters that meet the 500-timestep goal.
 
-- Discount Factor: The agent is capable of with very little discounting. That is, gamma=[0.99, 1.0], 
-whether SARSA or Q-learning.
-
-- Epsilon Exploration Factor: As far as I can tell, the best performance was achieved when the it starts at full 
-exploration and decays with 0.99. I've also added a minimum_exploration of 0.01. This may, in some cases, cause the agent not 
-to converge "fast", but the final performance is still achieved.
+| Algorithm | Method | Alpha | Lambda | Number of Episodes before success |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| SARSA  | Tabular | 0.45 Constant | 0.0  | 420 |
+| Q-learning  | Tabular | 0.46 Constant | 0.0  | 450 |
+| SARSA  | Tabular | 0.46 Constant | 0.37 | 360 |
+| Q-learning  | Tabular | 0.5-->0.1 (0.9 decay) | 0.5 | 280 |
+| SARSA  | LVFA | 0.2-->0.1 (0.9 decay) | N/A | 890 |
+| Q-learning | LVFA | 0.5-->0.4 (0.99 decay) | N/A | 2010 |
+| Q-learning | Neural Network | 0.001 (Adam) | N/A | 320 |
